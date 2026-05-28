@@ -1,0 +1,57 @@
+public class PatientRepository : IPatientRepository
+{
+    private readonly AppDbContext _context;
+
+    public PatientRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<Patient?> GetById(int patientId)
+    {
+        return await _context.Patients
+            .FirstOrDefaultAsync(p => p.Id == patientId);
+    }
+
+    public async Task<List<Patient>> GetAll()
+    {
+        return await _context.Patients.Include(p => p.Vlasnik).Include(p => p.AnimalType).Include(p=>p.Veterinar).ToListAsync();
+    }
+
+    public async Task CreateAsync(Patient patient)
+    {
+        _context.Patients.Add(patient);
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<Patient?> UpdateAsync(Patient patient, int patientId)
+    {
+        var existingPatient = await _context.Patients
+            .FirstOrDefaultAsync(p => p.Id == patientId);
+
+        if (existingPatient == null)
+            return null;
+
+        existingPatient.Name = patient.Name;
+        existingPatient.Birthdate = patient.Birthdate;
+        existingPatient.AnimalTypeId = patient.AnimalTypeId;
+        existingPatient.Birthdate = patient.Birthdate;
+
+        await _context.SaveChangesAsync();
+
+        return existingPatient;
+    }
+
+    public async Task DeleteAsync(int patientId)
+    {
+        var patient = await _context.Patients.FindAsync(patientId);
+
+        if (patient == null)
+            return;
+
+        _context.Patients.Remove(patient);
+
+        await _context.SaveChangesAsync();
+    }
+}

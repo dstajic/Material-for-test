@@ -1,0 +1,52 @@
+namespace Exam.App.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class PatientController : Controller
+    {
+        private readonly IPatientService _service;
+        public PatientController(IPatientService service)
+        {
+           _service=service;
+        }
+        [HttpGet("{Id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            return Ok(await _service.GetById(id));
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            return Ok(await _service.GetAll());
+        }
+        [HttpPut("{patientId}")]
+        public async Task<IActionResult> Update(UpdatePatientDto patientUpdateDto, int patientId)
+        {
+            return Ok(await _service.Update(patientUpdateDto, patientId));
+        }
+        [HttpPost]
+        public async Task<IActionResult> Create(CreatePatientDto dto)
+        {
+            try
+            {
+                await _service.Create(dto);
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    innerException = ex.InnerException?.Message
+                });
+            }
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _service.Delete(id);
+            return NoContent();
+        }
+    }
+}
